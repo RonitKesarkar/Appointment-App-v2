@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block  body %}
+    <h1>Select Type</h1>
+    {% if doctors|length==0 %}
+    No Record
+    {% else %}
+    <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">S.No</th>
+            <th scope="col">Name</th>
+            <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doctor in doctors %}
+            <tr>
+            <th scope="row">{{loop.index}}</th>
+            <td>{{doctor.username}}</td>
+            <td><a href="/book/{{doctor.id}}/{{user.id}}" type="button" class="btn btn-dark btn-sm mx-1">Book Appointment</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        {% endif %}
+    <br>
+    <a href="/dashboard/{{user.id}}" type="button">Back</a>
+    <a href="{{url_for('logout')}}">logout</a>
+{% endblock  body %}

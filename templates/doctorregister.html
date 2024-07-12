@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block  body %}
+<h1>Doctor Register Page</h1>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    {{ form.username }}
+    {{ form.password }}
+    {{ form.type }}
+    {{ form.submit }}
+</form>
+<a href="{{url_for('doctorlogin')}}">Already have an account? Login Here!<br>
+{% endblock  body %}

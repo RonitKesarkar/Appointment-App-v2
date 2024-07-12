@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block  body %}
+    <h1>Book your Appointment Here</h1>
+    <a href="/doctortype/Heart/{{user.id}}" type="button">Heart</a>
+    <a href="/doctortype/Bones/{{user.id}}" type="button">Bones</a>
+    <a href="/doctortype/Eyes/{{user.id}}" type="button">Eyes</a>
+    <a href="/doctortype/Normal/{{user.id}}" type="button">Normal</a>
+    <br>
+    <a href="/myappointments/{{user.id}}" type="button">My Appointments</a>
+    <a href="{{url_for('logout')}}">logout</a>
+{% endblock  body %}
