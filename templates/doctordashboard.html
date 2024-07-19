@@ -1,5 +1,38 @@
 {% extends "base.html" %}
 {% block  body %}
     <h1>Doctor Dashboard</h1>
+    {% if bookings|length==0 %}
+    No Appointments
+    {% else %}
+    <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">S.No.</th>
+            <th scope="col">Appointment No.</th>
+            <th scope="col">Patient</th>
+            <th scope="col">Date</th>
+            <th scope="col">From</th>
+            <th scope="col">To</th>
+            <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+            <th scope="row">{{loop.index}}</th>
+            <td>{{booking.id}}</td>
+            <td>{{booking.username}}</td>
+            <td>{{booking.date}}</td>
+            <td>{{booking.starttime}}</td>
+            <td>{{booking.endtime}}</td>
+            <td>
+                <a href="/completed/{{booking.id}}" type="button" class="btn btn-dark btn-sm mx-1">Completed</a>
+                <a href="/hold/{{booking.id}}" type="button" class="btn btn-dark btn-sm mx-1">Hold</a>
+                <td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        {% endif %}
     <a href="{{url_for('logout')}}">logout</a>
 {% endblock  body %}

@@ -42,6 +42,7 @@ class Booking(db.Model, UserMixin):
     userid=db.Column(db.Integer, nullable=False)
     doctorid=db.Column(db.Integer, nullable=False)
     doctorname=db.Column(db.String)
+    username=db.Column(db.String)
     date=db.Column(db.String)
     starttime=db.Column(db.String)
     endtime=db.Column(db.String)
@@ -99,8 +100,15 @@ def dashboard(id):
 @login_required
 def myappointments(id):
     user=User.query.filter_by(id=id).first()
-    bookings=Booking.query.filter_by(userid=id, mode="Patient").all()
+    bookings=Booking.query.filter_by(userid=id, mode="Patient").order_by(Booking.id.desc()).all()
     return render_template("myappointments.html",user=user,bookings=bookings)
+
+@app.route('/completedappointments/<int:id>', methods=['GET', 'POST'])
+@login_required
+def completedappointments(id):
+    user=User.query.filter_by(id=id).first()
+    bookings=Booking.query.filter_by(userid=id, mode="Completed").order_by(Booking.id.desc()).all()
+    return render_template("completedappointments.html",user=user,bookings=bookings)
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -134,13 +142,15 @@ def booked(doctorid,userid):
     doctor_id=doctorid
     doctor=Doctor.query.filter_by(id=doctorid).first()
     doctor_name=doctor.username
+    user=User.query.filter_by(id=userid).first()
+    user_name=user.username
     current_date=update_date
     start_time=last_booking.endtime
     temp_time=datetime.datetime.strptime(last_booking.endtime,"%H:%M:%S")+datetime.timedelta(minutes=15)
     end_time=temp_time.strftime("%H:%M:%S")
     time_taken="15"
     mode="Patient"
-    booked=Booking(userid=user_id, doctorid=doctor_id, doctorname=doctor_name, date=current_date, starttime=start_time, endtime=end_time, timetaken=time_taken, mode=mode)
+    booked=Booking(userid=user_id, doctorid=doctor_id, doctorname=doctor_name, username=user_name, date=current_date, starttime=start_time, endtime=end_time, timetaken=time_taken, mode=mode)
     db.session.add(booked)
     db.session.commit()
     doctor=Doctor.query.filter_by(id=doctorid).first()
@@ -161,12 +171,13 @@ with app.app_context():
                 doctor_id=doctor.id
                 doctor=Doctor.query.filter_by(id=doctor.id).first()
                 doctor_name=doctor.username
+                user_name="Initial Booking"
                 current_date=update_date
                 start_time=date.strftime("%H:%M:%S")
                 end_time=date.strftime("%H:%M:%S")
                 time_taken="0"
                 mode="Initial"
-                booked=Booking(userid=user_id, doctorid=doctor_id, doctorname=doctor_name ,date=current_date, starttime=start_time, endtime=end_time, timetaken=time_taken, mode=mode)
+                booked=Booking(userid=user_id, doctorid=doctor_id, doctorname=doctor_name, username=user_name, date=current_date, starttime=start_time, endtime=end_time, timetaken=time_taken, mode=mode)
                 db.session.add(booked)
                 db.session.commit()
         else:
@@ -177,12 +188,13 @@ with app.app_context():
             doctor_id=doctor.id
             doctor=Doctor.query.filter_by(id=doctor.id).first()
             doctor_name=doctor.username
+            user_name="Initial Booking"
             current_date=update_date
             start_time=date.strftime("%H:%M:%S")
             end_time=date.strftime("%H:%M:%S")
             time_taken="0"
             mode="Initial"
-            booked=Booking(userid=user_id, doctorid=doctor_id, doctorname=doctor_name, date=current_date, starttime=start_time, endtime=end_time, timetaken=time_taken, mode=mode)
+            booked=Booking(userid=user_id, doctorid=doctor_id, doctorname=doctor_name, username=user_name, date=current_date, starttime=start_time, endtime=end_time, timetaken=time_taken, mode=mode)
             db.session.add(booked)
             db.session.commit()
 

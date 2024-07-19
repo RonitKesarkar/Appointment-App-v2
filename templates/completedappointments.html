@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block  body %}
-    <h1>My Bookings</h1>
+    <h1>Completed Appointments</h1>
     {% if bookings|length==0 %}
     No Appointments
     {% else %}
@@ -30,8 +30,6 @@
         </table>
         {% endif %}
     <br>
-    <a href="/completedappointments/{{user.id}}" type="button">Completed Appointments</a>
-    <br>
-    <a href="/dashboard/{{user.id}}" type="button">Back</a>
+    <a href="/myappointments/{{user.id}}" type="button">Back</a>
     <a href="{{url_for('logout')}}">logout</a>
 {% endblock  body %}

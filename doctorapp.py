@@ -5,11 +5,13 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField
 from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
+import datetime 
 
 db=SQLAlchemy()
 app = Flask(__name__)
 bcrypt=Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///doctordb.db'
+app.config['SQLALCHEMY_BINDS']={"bookings":'sqlite:///bookings.db'}
 app.config['SECRET_KEY']='!Qy7faRque9N~+oxx}UA406\£h}!oua7FylE#8f,]@x!L(YTWd'
 db.init_app(app)
 
@@ -20,6 +22,21 @@ login_manager.login_view="login"
 @login_manager.user_loader
 def load_user(user_id):
     return Doctor.query.get(int(user_id))
+
+class Booking(db.Model, UserMixin):
+    __bind_key__="bookings"
+    id=db.Column(db.Integer, primary_key=True)
+    userid=db.Column(db.Integer, nullable=False)
+    doctorid=db.Column(db.Integer, nullable=False)
+    doctorname=db.Column(db.String)
+    username=db.Column(db.String)
+    date=db.Column(db.String)
+    starttime=db.Column(db.String)
+    endtime=db.Column(db.String)
+    timetaken=db.Column(db.String)
+    mode=db.Column(db.String)
+    def __repr__(self)->str:
+        return f"{self.id} - {self.title}"
 
 class Doctor(db.Model, UserMixin):
     id=db.Column(db.Integer, primary_key=True)
@@ -51,7 +68,8 @@ def doctorlogin():
         if user:
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user)
-                return redirect(url_for('doctordashboard'))
+                bookings=Booking.query.filter_by(doctorid=user.id, mode="Patient").all()
+                return render_template("doctordashboard.html", user=user, bookings=bookings)
             else:
                 flash("Wrong Password! Please try again.")
         else:
@@ -66,20 +84,34 @@ def doctorregister():
         new_user=Doctor(username=form.username.data, password=hashed_password, Type=form.type.data)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('doctorlogin'))
+        return render_template('doctorlogin')
     return render_template("doctorregister.html", form=form)
 
-@app.route('/doctordashboard', methods=['GET', 'POST'])
+@app.route('/doctordashboard/<int:id>', methods=['GET', 'POST'])
 @login_required
-def doctordashboard():
-    return render_template("doctordashboard.html")
+def doctordashboard(id):
+    doctor=Doctor.query.filter_by(id=id).first()
+    bookings=Booking.query.filter_by(doctorid=id, mode="Patient").all()
+    return render_template("doctordashboard.html", doctor=doctor, bookings=bookings)
+
+@app.route('/completed/<int:id>', methods=['GET', 'POST'])
+@login_required
+def completed(id):
+    booking=Booking.query.filter_by(id=id).first()
+    booking.mode="Completed"
+    db.session.commit()
+    booking=Booking.query.filter_by(id=id).first()
+    doctorid=booking.doctorid
+    doctor=Doctor.query.filter_by(id=doctorid).first()
+    bookings=Booking.query.filter_by(doctorid=doctorid, mode="Patient").all()
+    return render_template("doctordashboard.html", doctor=doctor, bookings=bookings)
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     form=LoginForm()
-    return render_template("doctorlogin.html", form=form)
+    return redirect(url_for('doctorlogin'))
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
